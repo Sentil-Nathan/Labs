@@ -1,0 +1,332 @@
+CREATE DATABASE Lab3;
+use Lab3
+
+mysql> CREATE TABLE Patient (
+    -> P_ID int,
+    -> Patient_Name varchar(255),
+    -> Sex varchar(10),
+    -> Age int,
+    -> Area varchar(255),
+    -> City varchar(255),
+    -> H_ID int,
+    -> PRIMARY KEY(P_ID)
+    -> );
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> CREATE TABLE Test_Report (
+    -> T_ID int,
+    -> P_ID int,
+    -> H_ID int,
+    -> Reporting_date datetime,
+    -> Test_result boolean,
+    -> Discharge_date datetime,
+    -> PRIMARY KEY (T_ID)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> CREATE TABLE Hospital (
+    -> H_ID int,
+    -> Hospital_Name varchar(255),
+    -> Location varchar(50),
+    -> State varchar(50),
+    -> T_ID int,
+    -> PRIMARY KEY (H_ID)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> ALTER TABLE Patient 
+    -> ADD FOREIGN KEY (H_ID) REFERENCES Hospital(H_ID);
+Query OK, 0 rows affected (0.07 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE Test_Report
+    -> ADD FOREIGN KEY (P_ID) REFERENCES Patient(P_ID),
+    -> ADD FOREIGN KEY (H_ID) REFERENCES Hospital(H_ID);
+Query OK, 0 rows affected (0.07 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE Hospital
+    -> ADD FOREIGN KEY(T_ID) REFERENCES Test_Report(T_ID);
+Query OK, 0 rows affected (0.07 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql>  INSERT INTO Hospital (H_ID,Hospital_Name,Location,State)
+    -> VALUES
+    -> (1,'Apollo','Chennai','Tamil Nadu'),
+    -> (2,'Miot','Chennai','Tamil Nadu'),
+    -> (3,'Apollo','Kovai','Tamil Nadu'),
+    -> (4,'Be Well','Erode','Tamil Nadu'),
+    -> (5,'Apollo','Mumbai','Maharashtra'),
+    -> (6,'Ganesha','Nagpur','Maharashtra');
+Query OK, 6 rows affected (0.02 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Patient(P_ID, Patient_Name, Sex, Age, Area, City)
+    -> VALUES
+    -> (1,'Shiv','M',20,'Ambattur','Chennai'),
+    -> (2,'Donald','M',19,'Vadapalani','Chennai'),
+    -> (3,'Lokanush','M',10,'Kolathur','Chennai'),
+    -> (4,'Skandan','M',11,'Anna Nagar','Chennai'),
+    -> (5,'Abhinya','F',13,'Anna Nagar','Chennai'),
+    -> (6,'Madhumita','F',12,'T Nagar','Chennai');
+Query OK, 6 rows affected (0.01 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> INSERT INTO Test_Report (T_ID,P_ID,H_ID,Reporting_date,Test_result,Discharge_date) 
+    -> VALUES
+    -> (1,1,1,'2022-09-01',false,'2022-09-11'),
+    -> (2,2,2,'2022-09-02',true,'2022-09-12'),
+    -> (3,3,1,'2022-09-03',true,'2022-09-17'),
+    -> (4,4,3,'2022-05-04',true,'2022-05-21'),
+    -> (5,5,5,'2022-05-04',true,'2022-05-21'),
+    -> (6,6,2,'2022-05-05',true,'2022-05-18');
+Query OK, 6 rows affected (0.01 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> CREATE VIEW Test 
+    -> AS (SELECT T_ID, P_ID, H_ID
+    -> FROM Test_Report);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> UPDATE Patient 
+    -> JOIN Test
+    -> ON Patient.P_ID=Test.P_ID  
+    -> SET Patient.H_ID=Test.H_ID;
+Query OK, 6 rows affected (0.02 sec)
+Rows matched: 6  Changed: 6  Warnings: 0
+
+mysql> UPDATE Hospital
+    -> JOIN Test
+    -> ON Hospital.H_ID=Test.H_ID
+    -> SET Hospital.T_ID=Test.T_ID;
+Query OK, 4 rows affected (0.02 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+mysql> select * from Patient
+    -> ;
++------+--------------+------+------+------------+---------+------+
+| P_ID | Patient_Name | Sex  | Age  | Area       | City    | H_ID |
++------+--------------+------+------+------------+---------+------+
+|    1 | Shiv         | M    |   20 | Ambattur   | Chennai |    1 |
+|    2 | Donald       | M    |   19 | Vadapalani | Chennai |    2 |
+|    3 | Lokanush     | M    |   10 | Kolathur   | Chennai |    1 |
+|    4 | Skandan      | M    |   11 | Anna Nagar | Chennai |    3 |
+|    5 | Abhinya      | F    |   13 | Anna Nagar | Chennai |    5 |
+|    6 | Madhumita    | F    |   12 | T Nagar    | Chennai |    2 |
++------+--------------+------+------+------------+---------+------+
+6 rows in set (0.00 sec)
+
+mysql> select * from Hospital;
++------+---------------+----------+-------------+------+
+| H_ID | Hospital_Name | Location | State       | T_ID |
++------+---------------+----------+-------------+------+
+|    1 | Apollo        | Chennai  | Tamil Nadu  |    1 |
+|    2 | Miot          | Chennai  | Tamil Nadu  |    2 |
+|    3 | Apollo        | Kovai    | Tamil Nadu  |    4 |
+|    4 | Be Well       | Erode    | Tamil Nadu  | NULL |
+|    5 | Apollo        | Mumbai   | Maharashtra |    5 |
+|    6 | Ganesha       | Nagpur   | Maharashtra | NULL |
++------+---------------+----------+-------------+------+
+6 rows in set (0.00 sec)
+
+mysql> select * from Test_Report;
++------+------+------+---------------------+-------------+---------------------+
+| T_ID | P_ID | H_ID | Reporting_date      | Test_result | Discharge_date      |
++------+------+------+---------------------+-------------+---------------------+
+|    1 |    1 |    1 | 2022-09-01 00:00:00 |           0 | 2022-09-11 00:00:00 |
+|    2 |    2 |    2 | 2022-09-02 00:00:00 |           1 | 2022-09-12 00:00:00 |
+|    3 |    3 |    1 | 2022-09-03 00:00:00 |           1 | 2022-09-17 00:00:00 |
+|    4 |    4 |    3 | 2022-05-04 00:00:00 |           1 | 2022-05-21 00:00:00 |
+|    5 |    5 |    5 | 2022-05-04 00:00:00 |           1 | 2022-05-21 00:00:00 |
+|    6 |    6 |    2 | 2022-05-05 00:00:00 |           1 | 2022-05-18 00:00:00 |
++------+------+------+---------------------+-------------+---------------------+
+6 rows in set (0.00 sec)
+
+-- Q1
+SELECT Patient.Patient_Name 
+FROM Patient
+WHERE age < 15;
+
++--------------+
+| Patient_Name |
++--------------+
+| Lokanush     |
+| Skandan      |
+| Abhinya      |
+| Madhumita    |
++--------------+
+4 rows in set (0.00 sec)
+
+
+-- Q2
+SELECT P.Patient_Name 
+FROM Patient P, Hospital H
+WHERE P.H_ID=H.H_ID AND H.Hospital_Name='Apollo';
+
++--------------+
+| Patient_Name |
++--------------+
+| Shiv         |
+| Lokanush     |
+| Skandan      |
+| Abhinya      |
++--------------+
+4 rows in set (0.00 sec)
+
+
+-- Q3
+CREATE VIEW H_Ratio
+AS (SELECT H.Hospital_Name AS Hospital, SUM(T.Discharge_date-T.Reporting_date)/COUNT(T.Discharge_date-T.Reporting_date) AS RecoveryRatio 
+FROM Test_Report T, Hospital H
+WHERE T.H_ID=H.H_ID
+GROUP BY H.Hospital_Name);
+
+SELECT * FROM H_Ratio;
+
++----------+---------------+
+| Hospital | RecoveryRatio |
++----------+---------------+
+| Apollo   | 14500000.0000 |
+| Miot     | 11500000.0000 |
++----------+---------------+
+2 rows in set (0.00 sec)
+
+
+-- Q4
+CREATE VIEW Last3Results
+AS (SELECT * FROM Test_Report
+WHERE Reporting_date > NOW()-7890000);
+SELECT * FROM Last3Results;
+
++------+------+------+---------------------+-------------+---------------------+
+| T_ID | P_ID | H_ID | Reporting_date      | Test_result | Discharge_date      |
++------+------+------+---------------------+-------------+---------------------+
+|    1 |    1 |    1 | 2022-09-01 00:00:00 |           0 | 2022-09-11 00:00:00 |
+|    2 |    2 |    2 | 2022-09-02 00:00:00 |           1 | 2022-09-12 00:00:00 |
+|    3 |    3 |    1 | 2022-09-03 00:00:00 |           1 | 2022-09-17 00:00:00 |
++------+------+------+---------------------+-------------+---------------------+
+
+
+-- Q5
+SELECT P.Patient_Name, P.Age
+FROM Patient P, Test_Report T
+WHERE P.P_ID=T.P_ID AND T.Test_result=false;
+
++--------------+------+
+| Patient_Name | Age  |
++--------------+------+
+| Shiv         |   20 |
++--------------+------+
+1 row in set (0.00 sec)
+
+
+-- Q6
+SELECT H.Location, COUNT(*)
+FROM Hospital H, Test_Report TP
+WHERE H.H_ID=TP.H_ID AND TP.Test_result=true
+GROUP BY H.Location;
+
++----------+----------+
+| Location | COUNT(*) |
++----------+----------+
+| Chennai  |        3 |
+| Kovai    |        1 |
+| Mumbai   |        1 |
++----------+----------+
+3 rows in set (0.00 sec)
+
+
+-- Q7
+CREATE VIEW ChildPatients
+AS (
+	SELECT P.Patient_Name, H.State
+	FROM Patient P, Hospital H, Test_Report T
+	WHERE P.P_ID=T.P_ID AND H.H_ID=T.H_ID AND P.Age < 18 AND T.Test_result=true
+);
+
+SELECT State, COUNT(*) AS ChildrenPositive
+FROM ChildPatients
+GROUP BY State;
+
++-------------+------------------+
+| State       | ChildrenPositive |
++-------------+------------------+
+| Tamil Nadu  |                3 |
+| Maharashtra |                1 |
++-------------+------------------+
+2 rows in set (0.00 sec)
+
+-- Q8
+mysql> CREATE VIEW AllPatients
+    -> AS 
+    -> (SELECT Patient.Patient_Name, Patient.City, Test.H_ID FROM Patient 
+    -> LEFT JOIN Test
+    -> ON Patient.P_ID=Test.P_ID
+    -> ORDER BY Patient.P_ID);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> SELECT *
+    -> FROM AllPatients AP
+    -> CROSS JOIN Hospital H
+    -> ON AP.H_ID=H.H_ID AND AP.City=H.Location;
++--------------+---------+------+------+---------------+----------+------------+------+
+| Patient_Name | City    | H_ID | H_ID | Hospital_Name | Location | State      | T_ID |
++--------------+---------+------+------+---------------+----------+------------+------+
+| Shiv         | Chennai |    1 |    1 | Apollo        | Chennai  | Tamil Nadu |    1 |
+| Donald       | Chennai |    2 |    2 | Miot          | Chennai  | Tamil Nadu |    2 |
+| Lokanush     | Chennai |    1 |    1 | Apollo        | Chennai  | Tamil Nadu |    1 |
+| Madhumita    | Chennai |    2 |    2 | Miot          | Chennai  | Tamil Nadu |    2 |
++--------------+---------+------+------+---------------+----------+------------+------+
+4 rows in set (0.01 sec)
+
+
+-- Q9
+mysql> CREATE VIEW FemalePatients
+    -> AS 
+    -> (SELECT Patient.Patient_Name, Patient.City, Test.H_ID FROM Patient 
+    -> LEFT JOIN Test
+    -> ON Patient.P_ID=Test.P_ID
+    -> WHERE Patient.Sex='F'
+    -> ORDER BY Patient.P_ID);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> SELECT *
+    -> FROM FemalePatients FP
+    -> CROSS JOIN Hospital H
+    -> ON FP.H_ID=H.H_ID AND FP.City=H.Location;
++--------------+---------+------+------+---------------+----------+------------+------+
+| Patient_Name | City    | H_ID | H_ID | Hospital_Name | Location | State      | T_ID |
++--------------+---------+------+------+---------------+----------+------------+------+
+| Madhumita    | Chennai |    2 |    2 | Miot          | Chennai  | Tamil Nadu |    2 |
++--------------+---------+------+------+---------------+----------+------------+------+
+1 row in set (0.01 sec)
+
+
+-- Q10
+mysql> CREATE VIEW PositiveStates
+    -> AS (SELECT State, Hospital_Name, COUNT(*) AS NoCases 
+    -> FROM Hospital
+    -> LEFT JOIN Test_Report
+    -> ON Hospital.H_ID=Test_Report.H_ID
+    -> WHERE Test_Report.Test_result=true
+    -> GROUP BY Hospital_Name, State);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> SELECT P.State, P.Hospital_Name, P.NoCases 
+    -> FROM PositiveStates P
+    -> INNER JOIN
+    -> (SELECT State, MAX(NoCases) AS NoCases
+    -> FROM PositiveStates
+    -> GROUP BY State) AS M
+    -> ON M.State=P.state AND M.NoCases=P.NoCases;
++-------------+---------------+---------+
+| State       | Hospital_Name | NoCases |
++-------------+---------------+---------+
+| Tamil Nadu  | Miot          |       2 |
+| Tamil Nadu  | Apollo        |       2 |
+| Maharashtra | Apollo        |       1 |
++-------------+---------------+---------+
+3 rows in set (0.00 sec)
+

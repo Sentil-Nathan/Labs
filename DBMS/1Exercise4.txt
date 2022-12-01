@@ -1,0 +1,306 @@
+DROP DATABASE Lab5;
+CREATE DATABASE Lab5;
+USE Lab5;
+
+CREATE TABLE EMPLOYEE (
+	fname VARCHAR(50) NOT NULL ,
+	mint CHAR(1),
+	lname VARCHAR(50) NOT NULL,
+	ssn VARCHAR(10) NOT NULL,
+	bdate DATE NOT NULL,
+	address VARCHAR(100),
+	sex ENUM ('MALE','FEMALE','NOT SAY'),
+	salary INT,
+	superssn VARCHAR(10),
+	dno INT,
+	PRIMARY KEY(ssn)
+	-- FOREIGN KEY (superssn) REFERENCES EMPLOYEE(ssn)
+);
+
+CREATE TABLE DEPARTMENT (
+	dname VARCHAR(50) NOT NULL ,
+	dno INT,
+	mgrssn VARCHAR(10) NOT NULL,
+	mgrstartdate DATE NOT NULL ,
+	dlocation VARCHAR(100) NOT NULL,
+	PRIMARY KEY(dno)
+	-- FOREIGN KEY(mgrssn) REFERENCES EMPLOYEE(ssn)
+);
+
+
+CREATE TABLE PROJECT (
+	pname  VARCHAR(100) NOT NULL,
+	pno INT,
+	plocation VARCHAR(100),
+	dno INT NOT NULL,
+	PRIMARY KEY(pno),
+	FOREIGN KEY(dno) REFERENCES DEPARTMENT(dno)
+);
+
+CREATE TABLE WORKSON (
+	essn VARCHAR(10) NOT NULL,
+	pno INT,
+	hoursperweek INT,
+	FOREIGN KEY(pno) REFERENCES PROJECT(pno),
+	FOREIGN KEY(essn) REFERENCES EMPLOYEE(ssn)
+);
+
+CREATE TABLE DEPENDENT (
+	essn VARCHAR(10) NOT NULL,
+	depessn VARCHAR(10) NOT NULL,
+	FOREIGN KEY(essn) REFERENCES EMPLOYEE(ssn),
+	FOREIGN KEY(depessn) REFERENCES EMPLOYEE(ssn)
+);
+
+INSERT INTO EMPLOYEE (fname,mint,lname,ssn,bdate,address,sex,salary,dno)
+VALUES
+('Ulick',NULL, 'MacIlraith','8237688072','2002-07-08','6002 Oakridge Parkway','MALE',35758,1),
+('Chandler','K','Gibbings','1818717339','2002-04-23','933 Arkansas Junction','FEMALE',26556,2),
+('Barbie','M','Smith','1449455628','2001-10-28','739 Lakewood Gardens Junction','MALE',21819,2)
+;
+
+
+INSERT INTO DEPARTMENT (dname,dno,mgrssn,mgrstartdate,dlocation)
+VALUES
+('Research',1,'8237688072','2012-07-08','Stafford'),
+('Advertising',2,'1818717339','2010-01-10','GreenHall'),
+('HR',3,'1449455628','2011-01-10','RedVine')
+;
+
+INSERT INTO PROJECT (pname,pno,plocation,dno)
+VALUES
+('Better Productivity',1,'Stafford',1),
+('Eco-friendly image',2,'GreenHall',2),
+('LGBTQ+ Month',3,'Stafford',3)
+;
+
+INSERT INTO EMPLOYEE (fname,mint,lname,ssn,bdate,address,sex,salary,superssn,dno)
+VALUES
+('Tamas',NULL, 'Whitley','1567347415','1998-02-19','97 Elka Terrace','MALE',60418,'8237688072',1),
+('Frankie','M','Haworth','5799966668','1995-10-13','542 Oxford Plaza','MALE',14954,'1818717339',2),
+('Dolf','D','Marlon','8995782709','1997-04-02','2195 Shelley Park','FEMALE',58926,'1449455628',3),
+('Frankie','T','Skett','8702641882','2022-08-27','05105 Brickson Park Alley','MALE',126772,'1818717339',2),
+('Jedediah',NULL,'Yakobowitch','9024136483','2022-03-24','879 Oak Valley Plaza','MALE',183951,'1449455628',3)
+;
+
+INSERT INTO WORKSON (essn,pno,hoursperweek)
+VALUES
+('1567347415',1,70),
+('5799966668',2,50),
+('8702641882',2,80),
+('8995782709',3,75),
+('9024136483',3,95)
+;
+
+INSERT INTO DEPENDENT (essn,depessn)
+VALUES
+('5799966668','8702641882'),
+('8995782709','9024136483')
+;
+
+-- Q1
+mysql> SELECT bdate, address FROM EMPLOYEE
+    -> WHERE 
+    -> dno=(SELECT dno FROM DEPARTMENT WHERE dname='Research');
++------------+-----------------------+
+| bdate      | address               |
++------------+-----------------------+
+| 1998-02-19 | 97 Elka Terrace       |
+| 2002-07-08 | 6002 Oakridge Parkway |
++------------+-----------------------+
+2 rows in set (0.00 sec)
+
+-- Q2
+mysql> CREATE VIEW PROJECT_DEPT AS
+    -> (SELECT pno,DEPARTMENT.dno,dname, mgrssn FROM PROJECT 
+    -> LEFT JOIN DEPARTMENT
+    -> ON PROJECT.dno=DEPARTMENT.dno
+    -> WHERE plocation='Stafford');
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> SELECT pno,dname,lname,bdate,address
+    -> FROM PROJECT_DEPT 
+    -> LEFT JOIN EMPLOYEE
+    -> ON PROJECT_DEPT.mgrssn=EMPLOYEE.ssn;
++-----+----------+------------+------------+-------------------------------+
+| pno | dname    | lname      | bdate      | address                       |
++-----+----------+------------+------------+-------------------------------+
+|   1 | Research | MacIlraith | 2002-07-08 | 6002 Oakridge Parkway         |
+|   3 | HR       | Smith      | 2001-10-28 | 739 Lakewood Gardens Junction |
++-----+----------+------------+------------+-------------------------------+
+2 rows in set (0.00 sec)
+
+-- Q3
+mysql> SELECT E1.fname AS Employee_First, E1.lname AS Employee_Last, E2.fname AS Manager_First, E2.lname AS Manager_First
+    -> FROM EMPLOYEE E1, EMPLOYEE E2
+    -> WHERE E1.superssn IS NOT NULL AND E1.superssn=E2.ssn;
++----------------+---------------+---------------+---------------+
+| Employee_First | Employee_Last | Manager_First | Manager_First |
++----------------+---------------+---------------+---------------+
+| Dolf           | Marlon        | Barbie        | Smith         |
+| Jedediah       | Yakobowitch   | Barbie        | Smith         |
+| Frankie        | Haworth       | Chandler      | Gibbings      |
+| Frankie        | Skett         | Chandler      | Gibbings      |
+| Tamas          | Whitley       | Ulick         | MacIlraith    |
++----------------+---------------+---------------+---------------+
+5 rows in set (0.00 sec)
+
+-- Q4
+mysql> SELECT E.fname, E.mint, E.lname, E.ssn, E.bdate, E.address, E.sex, E.salary, D.dno, D.dname, D.mgrssn, D.mgrstartdate, D.dlocation
+    -> FROM EMPLOYEE E
+    -> LEFT JOIN DEPARTMENT D
+    -> ON E.dno=D.dno
+    -> WHERE D.dname='Research';
++-------+------+------------+------------+------------+-----------------------+------+--------+------+----------+------------+--------------+-----------+
+| fname | mint | lname      | ssn        | bdate      | address               | sex  | salary | dno  | dname    | mgrssn     | mgrstartdate | dlocation |
++-------+------+------------+------------+------------+-----------------------+------+--------+------+----------+------------+--------------+-----------+
+| Tamas | NULL | Whitley    | 1567347415 | 1998-02-19 | 97 Elka Terrace       | MALE |  60418 |    1 | Research | 8237688072 | 2012-07-08   | Stafford  |
+| Ulick | NULL | MacIlraith | 8237688072 | 2002-07-08 | 6002 Oakridge Parkway | MALE |  35758 |    1 | Research | 8237688072 | 2012-07-08   | Stafford  |
++-------+------+------------+------------+------------+-----------------------+------+--------+------+----------+------------+--------------+-----------+
+2 rows in set (0.00 sec)
+
+-- Q5
+mysql> SELECT P.pno, P.pname
+    -> FROM PROJECT P, DEPARTMENT D, EMPLOYEE E
+    -> WHERE P.dno=D.dno AND D.dno=E.dno AND E.lname='Smith';
++-----+--------------------+
+| pno | pname              |
++-----+--------------------+
+|   2 | Eco-friendly image |
++-----+--------------------+
+1 row in set (0.00 sec)
+
+-- Q6
+mysql> SELECT E.fname , E.lname
+    -> FROM EMPLOYEE E, DEPENDENT D
+    -> WHERE E.ssn LIKE D.essn ;
++---------+---------+
+| fname   | lname   |
++---------+---------+
+| Frankie | Haworth |
+| Dolf    | Marlon  |
++---------+---------+
+2 rows in set (0.00 sec)
+
+
+-- Q7
+mysql> CREATE VIEW DEPENDANT AS 
+    -> SELECT E.fname, D.essn, D.depessn
+    -> FROM EMPLOYEE E, DEPENDENT D
+    -> WHERE E.ssn=D.essn;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> 
+mysql> CREATE VIEW DEPENDEE AS 
+    -> SELECT E.fname, D.essn, D.depessn
+    -> FROM EMPLOYEE E, DEPENDENT D
+    -> WHERE E.ssn=D.depessn;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> SELECT D1.fname
+    -> FROM DEPENDANT D1, DEPENDEE D2
+    -> WHERE D1.essn=D2.essn AND D1.depessn=D2.depess2n AND D1.fname=D2.fname;
+ERROR 1054 (42S22): Unknown column 'D2.depess2n' in 'where clause'
+
+
+-- Q8
+mysql> SELECT MIN(salary), MAX(salary)
+    -> FROM EMPLOYEE;
++-------------+-------------+
+| MIN(salary) | MAX(salary) |
++-------------+-------------+
+|       14954 |      183951 |
++-------------+-------------+
+1 row in set (0.00 sec)
+
+-- Q9
+mysql> SELECT COUNT(DISTINCT salary) AS NO_SALARIES
+    -> FROM EMPLOYEE;
++-------------+
+| NO_SALARIES |
++-------------+
+|           8 |
++-------------+
+1 row in set (0.00 sec)
+
+
+-- Q10
+
+
+-- Q11
+mysql> CREATE VIEW NAME_SALARY AS
+    -> SELECT E.fname, E.salary
+    -> FROM EMPLOYEE E;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> 
+mysql> SELECT * FROM NAME_SALARY; 
++----------+--------+
+| fname    | salary |
++----------+--------+
+| Barbie   |  21819 |
+| Tamas    |  60418 |
+| Chandler |  26556 |
+| Frankie  |  14954 |
+| Ulick    |  35758 |
+| Frankie  | 126772 |
+| Dolf     |  58926 |
+| Jedediah | 183951 |
++----------+--------+
+8 rows in set (0.00 sec)
+
+
+-- Q12
+mysql> CREATE VIEW EMP_PROJECT AS
+    -> (SELECT E.fname, E.dno, P.pno
+    -> FROM EMPLOYEE E
+    -> LEFT JOIN PROJECT P
+    -> ON E.dno=P.dno);
+Query OK, 0 rows affected (0.00 sec)
+ 
+mysql> SELECT * FROM EMP_PROJECT; 
++----------+------+------+
+| fname    | dno  | pno  |
++----------+------+------+
+| Barbie   |    2 |    2 |
+| Tamas    |    1 |    1 |
+| Chandler |    2 |    2 |
+| Frankie  |    2 |    2 |
+| Ulick    |    1 |    1 |
+| Frankie  |    2 |    2 |
+| Dolf     |    3 |    3 |
+| Jedediah |    3 |    3 |
++----------+------+------+
+8 rows in set (0.00 sec)
+
+
+-- Q13
+mysql> SELECT SUM(salary)
+    -> FROM EMPLOYEE;
++-------------+
+| SUM(salary) |
++-------------+
+|      529154 |
++-------------+
+1 row in set (0.00 sec)
+
+
+-- Q14
+mysql> SELECT MIN(salary), MAX(salary), AVG(salary)
+    -> FROM EMPLOYEE;
++-------------+-------------+-------------+
+| MIN(salary) | MAX(salary) | AVG(salary) |
++-------------+-------------+-------------+
+|       14954 |      183951 |  66144.2500 |
++-------------+-------------+-------------+
+1 row in set (0.01 sec)
+
+
+-- Q15
+mysql> SELECT fname, lname
+    -> FROM EMPLOYEE
+    -> WHERE ssn is NULL AND mgrstartdate > '2001-06-30';
+ERROR 1054 (42S22): Unknown column 'mgrstartdate' in 'where clause'`
+
+

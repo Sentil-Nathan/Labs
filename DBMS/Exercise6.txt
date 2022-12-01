@@ -1,0 +1,201 @@
+mysql> create Database Lab6;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use Lab6
+Database changed
+
+mysql> create table Employee(EmpNo int,EmpName varchar(30),Sex varchar(10),Salary int,Address varchar(100),DeptNo int);
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table Department(DeptNo int,DeptName varchar(10),Location varchar(30));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> create table Department(DeptNo int,DeptName varchar(10),Location varchar(30));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> alter table Employee add primary key(EmpNo);
+Query OK, 0 rows affected (0.06 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> alter table Employee add foreign key(DeptNo) references Department(DeptNo);
+Query OK, 0 rows affected (0.08 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+insert into Employee values
+    (1,'emp1','male',60000,'chennai',1),
+    (2,'emp2','male',40000,'covai',1),
+    (3,'emp3','female',70000,'chennai',2),
+    (4,'emp4','male',80000,'chennai',2),
+    (5,'emp5','female',40000,'erode',2),
+    (6,'emp6','female',50000,'madurai',3),
+    (7,'emp7','female',30000,'erode',3);
+
+insert into Department values
+    -> (1,'A','chennai'),
+    -> (2,'B','covai'),
+    -> (3,'C','chennai');
+
+mysql> select *from Employee;
++-------+---------+--------+--------+---------+--------+
+| EmpNo | EmpName | Sex    | Salary | Address | DeptNo |
++-------+---------+--------+--------+---------+--------+
+|     1 | emp1    | male   |  60000 | chennai |      1 |
+|     2 | emp2    | male   |  40000 | covai   |      1 |
+|     3 | emp3    | female |  70000 | chennai |      2 |
+|     4 | emp4    | male   |  80000 | chennai |      2 |
+|     5 | emp5    | female |  40000 | erode   |      2 |
+|     6 | emp6    | female |  50000 | madurai |      3 |
+|     7 | emp7    | female |  30000 | erode   |      3 |
++-------+---------+--------+--------+---------+--------+
+7 rows in set (0.00 sec)
+
+mysql> select *from Department;
++--------+----------+----------+
+| DeptNo | DeptName | Location |
++--------+----------+----------+
+|      1 | A        | chennai  |
+|      2 | B        | covai    |
+|      3 | C        | chennai  |
++--------+----------+----------+
+3 rows in set (0.00 sec)
+
+1)
+
+delimiter //
+CREATE PROCEDURE Dispemp(in empno INT)
+BEGIN
+SELECT *FROM Employee e WHERE e.EmpNo=empno;
+end//
+delimiter ;
+
+mysql> call Dispemp(1);
++-------+---------+------+--------+---------+--------+
+| EmpNo | EmpName | Sex  | Salary | Address | DeptNo |
++-------+---------+------+--------+---------+--------+
+|     1 | emp1    | male |  60000 | chennai |      1 |
++-------+---------+------+--------+---------+--------+
+1 row in set (0.00 sec)
+
+
+2)
+
+delimiter //
+CREATE PROCEDURE insertemp(in empno INT,in Empname varchar(30),in sex varchar(10),in salary int,in address varchar(100),in Deptno int)
+BEGIN
+INSERT INTO Employee VALUES(empno,Empname,sex,salary,address,Deptno);
+end//
+delimiter ;
+
+3)
+
+delimiter //
+CREATE PROCEDURE incrsal(in empno INT,in salary int)
+BEGIN
+update Employee e set e.Salary=e.Salary+salary where e.EmpNo=empno;
+end//
+delimiter ;
+
+4)
+
+delimiter //
+CREATE PROCEDURE Delemp(in empname varchar(30))
+BEGIN
+DELETE from Employee e WHERE e.EmpName=empname;
+end//
+delimiter ;
+
+5)
+
+delimiter //
+CREATE FUNCTION get_maxSalary() RETURNS INT DETERMINISTIC
+BEGIN
+DECLARE maxSalary int;
+SELECT MAX(Salary) into maxSalary from Employee;
+return maxSalary;
+end//
+delimiter ;
+
+mysql> select get_maxSalary();
++-----------------+
+| get_maxSalary() |
++-----------------+
+|           80000 |
++-----------------+
+
+
+6)
+
+delimiter //
+CREATE FUNCTION NumberEmp() RETURNS INT DETERMINISTIC
+BEGIN
+DECLARE numemp int;
+SELECT count(*) into numemp from Employee;
+return numemp;
+end//
+delimiter ;
+
+mysql> select NumberEmp();
++-------------+
+| NumberEmp() |
++-------------+
+|           7 |
++-------------+
+1 row in set (0.00 sec)
+
+7)
+
+delimiter //
+CREATE FUNCTION SalaryEmp(emp_no int) RETURNS INT DETERMINISTIC
+BEGIN
+DECLARE sal int;
+SELECT Salary into sal from Employee where EmpNo=emp_no;
+return sal;
+end//
+delimiter ;
+
+mysql> select SalaryEmp(6);
++--------------+
+| SalaryEmp(6) |
++--------------+
+|        50000 |
++--------------+
+1 row in set (0.00 sec)
+
+8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

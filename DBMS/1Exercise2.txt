@@ -1,0 +1,217 @@
+mysql> create database lab3;
+Query OK, 1 row affected (0.02 sec)
+
+mysql> use lab3
+Database changed
+
+mysql> create table Party(pid int,pname varchar(255),leader varchar(255),primary key (pid));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> create table Constituency(cid int,cname varchar(255),primary key (cid));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table Contestent(ctid int,ctname varchar(255),ctaddr varchar(255));
+Query OK, 0 rows affected (0.04 sec)
+
+
+mysql> alter table Contestent add primary key
+    -> (ctid);
+Query OK, 0 rows affected (0.05 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> create table Election(ctid int,number_of_votes int,pname varchar(255),cname varchar(255),foreign key(ctid) references Contestent(ctid));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> insert into Party values(1,'party1','person1'),(2,'party2','person2');
+Query OK, 2 rows affected (0.01 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql> insert into Constituency values(1,'constituency1'),(2,'constituency2'),(3,'constituency3');
+Query OK, 3 rows affected (0.02 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+
+mysql> insert into Contestent values(1,'person1','addr1'),(2,'person2','addr2'),(3,'person3','addr3');
+Query OK, 3 rows affected (0.02 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> insert into Election values(1,5000,'party1','constituency1'),(1,7000,'party1','constituency2'),(2,4000,'party2','constituency2'),(2,11000,'party2','constituency3'),(3,7000,'party1','constituency3'),(3,3000,'party1','constituency1');
+Query OK, 6 rows affected (0.01 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> select * from Party;
++-----+--------+---------+
+| pid | pname  | leader  |
++-----+--------+---------+
+|   1 | party1 | person1 |
+|   2 | party2 | person2 |
++-----+--------+---------+
+2 rows in set (0.00 sec)
+
+mysql> select * from Constituency;
++-----+---------------+
+| cid | cname         |
++-----+---------------+
+|   1 | constituency1 |
+|   2 | constituency2 |
+|   3 | constituency3 |
++-----+---------------+
+3 rows in set (0.00 sec)
+
+mysql> select * from Contestent;
++------+---------+--------+
+| ctid | ctname  | ctaddr |
++------+---------+--------+
+|    1 | person1 | addr1  |
+|    2 | person2 | addr2  |
+|    3 | person3 | addr3  |
++------+---------+--------+
+3 rows in set (0.00 sec)
+
+mysql> select * from Election;
++------+-----------------+--------+---------------+
+| ctid | number_of_votes | pname  | cname         |
++------+-----------------+--------+---------------+
+|    1 |            5000 | party1 | constituency1 |
+|    1 |            7000 | party1 | constituency2 |
+|    2 |            4000 | party2 | constituency2 |
+|    2 |           11000 | party2 | constituency3 |
+|    3 |            7000 | party1 | constituency3 |
+|    3 |            3000 | party1 | constituency1 |
++------+-----------------+--------+---------------+
+6 rows in set (0.00 sec)
+
+
+2.ans:
+
+mysql> select c.ctid,c.ctname,c.ctaddr from Contestent c inner join Election e on c.ctid = e.ctid where(select sum(number_of_votes) from Election where ctid=c.ctid)>10000;
++------+---------+--------+
+| ctid | ctname  | ctaddr |
++------+---------+--------+
+|    1 | person1 | addr1  |
+|    1 | person1 | addr1  |
+|    2 | person2 | addr2  |
+|    2 | person2 | addr2  |
++------+---------+--------+
+4 rows in set (0.00 sec)
+
+
+3.ans:
+
+mysql> select e.cname,count(*) from Election e group by cname;
++---------------+----------+
+| cname         | count(*) |
++---------------+----------+
+| constituency1 |        2 |
+| constituency2 |        2 |
+| constituency3 |        2 |
++---------------+----------+
+3 rows in set (0.00 sec)
+
+
+4.ans:
+
+mysql> with CTE_TEST as(select max(e.number_of_votes) as number_of_votes,e.cname as cname from Election e,Contestent c group by e.cname) select c.ctname,e.cname,CTE_TEST.number_of_votes from Contestent c inner join Election e on e.ctid=c.ctid inner join CTE_TEST on e.number_of_votes = CTE_TEST.number_of_votes where e.cname = CTE_TEST.cname;
++---------+---------------+-----------------+
+| ctname  | cname         | number_of_votes |
++---------+---------------+-----------------+
+| person1 | constituency1 |            5000 |
+| person1 | constituency2 |            7000 |
+| person2 | constituency3 |           11000 |
++---------+---------------+-----------------+
+3 rows in set (0.00 sec)
+
+
+5.ans:
+
+mysql> with CTE_TEST as(select max(e.number_of_votes) as number_of_votes,e.cname as cname from Election e,Contestent c group by e.cname) select e.pname,c.ctname,CTE_TEST.number_of_votes from Contestent c inner join Election e on e.ctid=c.ctid inner join CTE_TEST on e.number_of_votes = CTE_TEST.number_of_votes where e.cname = CTE_TEST.cname;
++--------+---------+-----------------+
+| pname  | ctname  | number_of_votes |
++--------+---------+-----------------+
+| party1 | person1 |            5000 |
+| party1 | person1 |            7000 |
+| party2 | person2 |           11000 |
++--------+---------+-----------------+
+3 rows in set (0.00 sec)
+
+
+6.ans:
+
+mysql> with CTE_TEST as(select max(e.number_of_votes) as number_of_votes,e.cname as cname from Election e,Contestent c group by e.cname) select e.pname,count(*)from Election e inner join CTE_TEST on e.number_of_votes=CTE_TEST.number_of_votes where e.cname = CTE_TEST.cname group by e.pname;
++--------+----------+
+| pname  | count(*) |
++--------+----------+
+| party1 |        2 |
+| party2 |        1 |
++--------+----------+
+2 rows in set (0.00 sec)
+
+
+7.ans:
+
+mysql> with CTE_TEST as(select max(e.number_of_votes) as number_of_votes,e.cname as cname from Election e,Contestent c group by e.cname) select c.ctid,c.ctname,e.pname from Contestent c inner join Electi
+on e on e.ctid=c.ctid inner join CTE_TEST on e.number_of_votes = CTE_TEST.number_of_votes where e.cname = CTE_TEST.cname and e.pname = 'party2';
++------+---------+--------+
+| ctid | ctname  | pname  |
++------+---------+--------+
+|    2 | person2 | party2 |
++------+---------+--------+
+1 row in set (0.00 sec)
+
+
+8.ans:
+
+mysql> with CTE_TEST as(select max(e.number_of_votes) as number_of_votes,e.cname as cname from Election e,Contestent c group by e.cname) select c.ctid,c.ctname,e.pname from Contestent c inner join Election e on e.ctid=c.ctid inner join CTE_TEST on e.number_of_votes = CTE_TEST.number_of_votes inner join Party p where e.cname = CTE_TEST.cname and e.pname = 'party1' and p.leader=c.ctname and e.cname ='constituency1';
++------+---------+--------+
+| ctid | ctname  | pname  |
++------+---------+--------+
+|    1 | person1 | party1 |
++------+---------+--------+
+1 row in set (0.01 sec)
+
+
+9.ans:
+
+mysql> create view PartyView as select ctid,cname,pname from Election;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select * from PartyView
+    -> ;
++------+---------------+--------+
+| ctid | cname         | pname  |
++------+---------------+--------+
+|    1 | constituency1 | party1 |
+|    1 | constituency2 | party1 |
+|    2 | constituency2 | party2 |
+|    2 | constituency3 | party2 |
+|    3 | constituency3 | party1 |
+|    3 | constituency1 | party1 |
++------+---------------+--------+
+6 rows in set (0.01 sec)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

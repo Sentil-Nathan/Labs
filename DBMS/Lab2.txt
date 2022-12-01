@@ -1,0 +1,120 @@
+1
+
+mysql> select gender,count(*) from Student where gender='m';
++--------+----------+
+| gender | count(*) |
++--------+----------+
+| m      |        3 |
++--------+----------+
+
+2
+
+mysql> select gender,count(*) from Student where gender='f';
++--------+----------+
+| gender | count(*) |
++--------+----------+
+| f      |        2 |
++--------+----------+
+
+
+3
+
+mysql> select * from Menu where hno=1 and day='tuesday';
++------+---------+-----------+--------+--------+
+| hno  | day     | breakfast | lunch  | dinner |
++------+---------+-----------+--------+--------+
+|    1 | tuesday | dosa      | sambar | panner |
++------+---------+-----------+--------+--------+
+
+4
+
+mysql> select Hostel.hname,count(case when Warden.hno=Hostel.hno then 1 end)from Hostel inner join Warden where Warden.hno=Hostel.hno group by Hostel.hname;
++---------+---------------------------------------------------+
+| hname   | count(case when Warden.hno=Hostel.hno then 1 end) |
++---------+---------------------------------------------------+
+| amber   |                                                 1 |
+| opal A  |                                                 1 |
+| diamond |                                                 1 |
+| opal    |                                                 1 |
+| coral   |                                                 1 |
++---------+---------------------------------------------------+
+
+5
+
+mysql> select Hostel.hname,Student.name from Student left join Hostel on Student.hno=Hostel.hno;
++---------+---------+
+| hname   | name    |
++---------+---------+
+| diamond | shiv    |
+| diamond | senthil |
+| opal    | sabi    |
+| opal A  | sharon  |
+| aqua    | velu    |
++---------+---------+
+
+6
+
+mysql> select * from Menu;
++------+---------+-----------+--------+---------+
+| hno  | day     | breakfast | lunch  | dinner  |
++------+---------+-----------+--------+---------+
+|    1 | monday  | pongal    | sambar | biryani |
+|    1 | tuesday | dosa      | sambar | panner  |
+|    2 | monday  | pongal    | sambar | biryani |
+|    3 | tuesday | dosa      | sambar | panner  |
+|    4 | monday  | idly      | sambar | chiken  |
+|    5 | tuesday | dosa      | sambar | panner  |
+|    6 | monday  | dosa      | sambar | panner  |
++------+---------+-----------+--------+---------+
+mysql> update Menu SET breakfast='Noodles' where hno=1 and day='tuesday';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from Menu;
++------+---------+-----------+--------+---------+
+| hno  | day     | breakfast | lunch  | dinner  |
++------+---------+-----------+--------+---------+
+|    1 | monday  | pongal    | sambar | biryani |
+|    1 | tuesday | Noodles   | sambar | panner  |
+|    2 | monday  | pongal    | sambar | biryani |
+|    3 | tuesday | dosa      | sambar | panner  |
+|    4 | monday  | idly      | sambar | chiken  |
+|    5 | tuesday | dosa      | sambar | panner  |
+|    6 | monday  | dosa      | sambar | panner  |
++------+---------+-----------+--------+---------+
+
+
+7
+
+mysql> select * from Warden where qual='BA';
++-------+------+------+
+| wname | qual | hno  |
++-------+------+------+
+| lali  | BA   |    5 |
++-------+------+------+
+
+8
+
+mysql> select name,hname from Student inner join Hostel where Student.hno=Hostel.hno and Student.name like "s%";
++---------+---------+
+| name    | hname   |
++---------+---------+
+| shiv    | diamond |
+| senthil | diamond |
+| sabi    | opal    |
+| sharon  | opal A  |
++---------+---------+
+
+
+9
+
+mysql> select Student.name,Student.gender,Student.hno,Warden.wname from Student,Warden where Student.hno= Warden.hno;
++---------+--------+------+--------+
+| name    | gender | hno  | wname  |
++---------+--------+------+--------+
+| sharon  | f      |    5 | lali   |
+| senthil | m      |    2 | murali |
+| shiv    | m      |    2 | murali |
+| sabi    | f      |    4 | raaji  |
++---------+--------+------+--------+
+

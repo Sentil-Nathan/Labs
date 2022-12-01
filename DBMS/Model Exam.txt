@@ -1,0 +1,312 @@
+create table Pet(name varchar(50), owner varchar(50), phone int, species varchar(50), sex varchar(10), bdate DATE, ddate DATE);
+
+alter table Pet add primary key(name);
+
+create table Event(name varchar(50), date DATE, type varchar(250), remark varchar(250));
+
+alter table Event add primary key(name);
+
+insert into Pet values
+('fluffy', 'harold regan', 789543210, 'cat', 'f', '1993-02-04', null),
+('claws', 'gwen cappaloo', 875643219, 'cat', 'm', '1994-03-17', null),
+('buffy', 'harold regan', 789543210, 'dog', 'f', '1989-05-13', null),
+('fang', 'benny robert', 987654321, 'dog', 'm', '1990-08-27',null),
+('bowser', 'diane charles', 985423111, 'dog', 'm', '1979-08-31', '1995-07-29'),
+('chirpy', 'gwen cappaloo', 875643219, 'bird', 'f', '1998-09-11',null),
+('whistler', 'gwen cappaloo', 875643219, 'bird', 'm', '1997-12-09',null),
+('slim', 'benny robert', 987654321, 'snake', 'm', '1996-04-29',null),
+('puffball', 'hamster danial', 342567812, 'diane', 'f', '1999-03-30', null));
+
+mysql> select * from Pet;
++----------+----------------+-----------+---------+------+------------+------------+
+| name     | owner          | phone     | species | sex  | bdate      | ddate      |
++----------+----------------+-----------+---------+------+------------+------------+
+| bowser   | diane charles  | 985423111 | dog     | m    | 1979-08-31 | 1995-07-29 |
+| buffy    | harold regan   | 789543210 | dog     | f    | 1989-05-13 | NULL       |
+| chirpy   | gwen cappaloo  | 875643219 | bird    | f    | 1998-09-11 | NULL       |
+| claws    | gwen cappaloo  | 875643219 | cat     | m    | 1994-03-17 | NULL       |
+| fang     | benny robert   | 987654321 | dog     | m    | 1990-08-27 | NULL       |
+| fluffy   | harold regan   | 789543210 | cat     | f    | 1993-02-04 | NULL       |
+| puffball | hamster danial | 342567812 | diane   | f    | 1999-03-30 | NULL       |
+| slim     | benny robert   | 987654321 | snake   | m    | 1996-04-29 | NULL       |
+| whistler | gwen cappaloo  | 875643219 | bird    | m    | 1997-12-09 | NULL       |
++----------+----------------+-----------+---------+------+------------+------------+
+9 rows in set (0.00 sec)
+
+insert into Event values('fluffy', '1995-05-15', 'litter', '4 kittens, 3 female, 1 male');
+insert into Event values('buffy', '1993-06-23', 'litter', '5 puppies, 2 female, 3 male');
+insert into Event values('buffy', '1994-06-19', 'litter', '3 puppies, 3 female');
+insert into Event values('chirpy', '1993-03-21', 'vet', 'needed beak straightened');
+insert into Event values('slim', '1997-08-03', 'vet', 'broken rib');
+insert into Event values('bowser', '1991-10-12', 'kennel', null);
+insert into Event values('fang', '1991-10-12', 'kennel', null);
+insert into Event values('fang', '1998-08-28', 'birthday', 'gave him a new chew toy');
+insert into Event values('claws', '1998-03-17', 'birthday', 'gave him a new flea collar');
+insert into Event values('whistler', '1998-12-09', 'birthday', 'first birthday');
+
+mysql> select * from Event;
++----------+------------+----------+-----------------------------+
+| name     | date       | type     | remark                      |
++----------+------------+----------+-----------------------------+
+| bowser   | 1991-10-12 | kennel   | NULL                        |
+| buffy    | 1993-06-23 | litter   | 5 puppies, 2 female, 3 male |
+| chirpy   | 1993-03-21 | vet      | needed beak straightened    |
+| claws    | 1998-03-17 | birthday | gave him a new flea collar  |
+| fang     | 1991-10-12 | kennel   | NULL                        |
+| fluffy   | 1995-05-15 | litter   | 4 kittens, 3 female, 1 male |
+| slim     | 1997-08-03 | vet      | broken rib                  |
+| whistler | 1998-12-09 | birthday | first birthday              |
++----------+------------+----------+-----------------------------+
+8 rows in set (0.00 sec)
+Q1) 
+
+select SUBSTRING_INDEX(owner," ",1) as Firstname,SUBSTRING_INDEX(owner," ",-1) as Secondname from Pet;
+
+mysql> select SUBSTRING_INDEX(owner," ",1) as Firstname,SUBSTRING_INDEX(owner," ",-1) as Secondname from Pet;
++-----------+------------+
+| Firstname | Secondname |
++-----------+------------+
+| diane     | charles    |
+| harold    | regan      |
+| gwen      | cappaloo   |
+| gwen      | cappaloo   |
+| benny     | robert     |
+| harold    | regan      |
+| hamster   | danial     |
+| benny     | robert     |
+| gwen      | cappaloo   |
++-----------+------------+
+9 rows in set (0.00 sec)
+
+
+Q2)
+
+select *from Pet where Pet.bdate >= '1998-01-01';
+
+mysql> select *from Pet where Pet.bdate >= '1998-01-01';
++----------+----------------+-----------+---------+------+------------+-------+
+| name     | owner          | phone     | species | sex  | bdate      | ddate |
++----------+----------------+-----------+---------+------+------------+-------+
+| chirpy   | gwen cappaloo  | 875643219 | bird    | f    | 1998-09-11 | NULL  |
+| puffball | hamster danial | 342567812 | diane   | f    | 1999-03-30 | NULL  |
++----------+----------------+-----------+---------+------+------------+-------+
+2 rows in set (0.00 sec)
+
+
+Q3)
+
+select *from Pet where Pet.species = 'bird' or Pet.species = 'snake';
+
+mysql> select *from Pet where Pet.species = 'bird' or Pet.species = 'snake';
++----------+---------------+-----------+---------+------+------------+-------+
+| name     | owner         | phone     | species | sex  | bdate      | ddate |
++----------+---------------+-----------+---------+------+------------+-------+
+| chirpy   | gwen cappaloo | 875643219 | bird    | f    | 1998-09-11 | NULL  |
+| slim     | benny robert  | 987654321 | snake   | m    | 1996-04-29 | NULL  |
+| whistler | gwen cappaloo | 875643219 | bird    | m    | 1997-12-09 | NULL  |
++----------+---------------+-----------+---------+------+------------+-------+
+3 rows in set (0.00 sec)
+
+Q4)
+
+select * from Pet order by species,bdate;
+
+mysql> select * from Pet order by species,bdate;
++----------+----------------+-----------+---------+------+------------+------------+
+| name     | owner          | phone     | species | sex  | bdate      | ddate      |
++----------+----------------+-----------+---------+------+------------+------------+
+| whistler | gwen cappaloo  | 875643219 | bird    | m    | 1997-12-09 | NULL       |
+| chirpy   | gwen cappaloo  | 875643219 | bird    | f    | 1998-09-11 | NULL       |
+| fluffy   | harold regan   | 789543210 | cat     | f    | 1993-02-04 | NULL       |
+| claws    | gwen cappaloo  | 875643219 | cat     | m    | 1994-03-17 | NULL       |
+| puffball | hamster danial | 342567812 | diane   | f    | 1999-03-30 | NULL       |
+| bowser   | diane charles  | 985423111 | dog     | m    | 1979-08-31 | 1995-07-29 |
+| buffy    | harold regan   | 789543210 | dog     | f    | 1989-05-13 | NULL       |
+| fang     | benny robert   | 987654321 | dog     | m    | 1990-08-27 | NULL       |
+| slim     | benny robert   | 987654321 | snake   | m    | 1996-04-29 | NULL       |
++----------+----------------+-----------+---------+------+------------+------------+
+9 rows in set (0.00 sec)
+
+
+Q5)
+
+select name, DATEDIFF(NOW(),bdate) as age from Pet where Pet.ddate is NULL; 
+
+mysql> select name, DATEDIFF(NOW(),bdate) as age from Pet where Pet.ddate is NULL; 
++----------+-------+
+| name     | age   |
++----------+-------+
+| buffy    | 12245 |
+| chirpy   |  8837 |
+| claws    | 10476 |
+| fang     | 11774 |
+| fluffy   | 10882 |
+| puffball |  8637 |
+| slim     |  9702 |
+| whistler |  9113 |
++----------+-------+
+8 rows in set (0.00 sec)
+
+
+Q6)
+
+select name, DATEDIFF(ddate,bdate) as age from Pet where Pet.ddate is NOT NULL; 
+
+mysql> select name, DATEDIFF(ddate,bdate) as age from Pet where Pet.ddate is NOT NULL; 
++--------+------+
+| name   | age  |
++--------+------+
+| bowser | 5811 |
++--------+------+
+1 row in set (0.01 sec)
+
+
+Q7)
+
+select * from Pet where MONTH(bdate)=MONTH(NOW());
+
+mysql> select * from Pet where MONTH(bdate)=MONTH(NOW());
+Empty set (0.00 sec)
+
+
+Q8) 
+
+select * from Pet where Pet.name like "%f%" ;
+
+mysql> select * from Pet where Pet.name like "%f%" ;
++----------+----------------+-----------+---------+------+------------+-------+
+| name     | owner          | phone     | species | sex  | bdate      | ddate |
++----------+----------------+-----------+---------+------+------------+-------+
+| buffy    | harold regan   | 789543210 | dog     | f    | 1989-05-13 | NULL  |
+| fang     | benny robert   | 987654321 | dog     | m    | 1990-08-27 | NULL  |
+| fluffy   | harold regan   | 789543210 | cat     | f    | 1993-02-04 | NULL  |
+| puffball | hamster danial | 342567812 | diane   | f    | 1999-03-30 | NULL  |
++----------+----------------+-----------+---------+------+------------+-------+
+4 rows in set (0.01 sec)
+
+Q9) 
+
+select owner, count(*) as count from Pet group by owner;
+
+mysql> select owner, count(*) as count from Pet group by owner;
++----------------+-------+
+| owner          | count |
++----------------+-------+
+| diane charles  |     1 |
+| harold regan   |     2 |
+| gwen cappaloo  |     3 |
+| benny robert   |     2 |
+| hamster danial |     1 |
++----------------+-------+
+5 rows in set (0.00 sec)
+
+10)
+
+select species, sex, count(*) as count from Pet group by species,sex;
+
+mysql> select species, sex, count(*) as count from Pet group by species,sex;
++---------+------+-------+
+| species | sex  | count |
++---------+------+-------+
+| dog     | m    |     2 |
+| dog     | f    |     1 |
+| bird    | f    |     1 |
+| cat     | m    |     1 |
+| cat     | f    |     1 |
+| diane   | f    |     1 |
+| snake   | m    |     1 |
+| bird    | m    |     1 |
++---------+------+-------+
+8 rows in set (0.00 sec)
+
+
+11)
+
+select DATEDIFF(e.date, p.bdate) as age,p.name from Pet p inner join Event e on e.name=p.name and e.type='litter';
+
+mysql> select DATEDIFF(e.date, p.bdate) as age,p.name from Pet p inner join Event e on e.name=p.name and e.type='litter';
++-------+--------+
+| age   | name   |
++-------+--------+
+| 1502 | buffy  |
+|  830 | fluffy |
++-------+--------+
+2 rows in set (0.00 sec)
+
+
+12)
+
+
+
+14)
+
+delimiter //
+create procedure oy()
+begin
+     select * from Pet order by bdate Limit 1;
+     select * from Pet order by bdate DESC Limit 1;
+end //
+delimiter ;
+
+mysql> call oy();
++--------+---------------+-----------+---------+------+------------+------------+
+| name   | owner         | phone     | species | sex  | bdate      | ddate      |
++--------+---------------+-----------+---------+------+------------+------------+
+| bowser | diane charles | 985423111 | dog     | m    | 1979-08-31 | 1995-07-29 |
++--------+---------------+-----------+---------+------+------------+------------+
+1 row in set (0.00 sec)
+
++----------+----------------+-----------+---------+------+------------+-------+
+| name     | owner          | phone     | species | sex  | bdate      | ddate |
++----------+----------------+-----------+---------+------+------------+-------+
+| puffball | hamster danial | 342567812 | diane   | f    | 1999-03-30 | NULL  |
++----------+----------------+-----------+---------+------+------------+-------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.00 sec)
+
+
+15)
+
+delimiter //
+create function age (nam varchar(50)) returns int deterministic
+begin
+declare age int;
+select DATEDIFF(NOW(),bdate) into age from Pet where Pet.name=nam;
+return age;
+end //
+delimiter ;
+
+mysql> select age ("puffball");
++------------------+
+| age ("puffball") |
++------------------+
+|             8637 |
++------------------+
+1 row in set (0.00 sec)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

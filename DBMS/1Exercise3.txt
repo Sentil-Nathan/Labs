@@ -1,0 +1,178 @@
+mysql> create table Employee(e_name varchar(255),street varchar(255),city varchar(255));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> create table Bank(bank_name varchar(255),city varchar(255));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> alter table Employee add primary key(e_name);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> alter table Bank add primary key(bank_name);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> create table Works(e_name varchar(255),bank_name varchar(255),salary int);
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> create table Manages(e_name varchar(255), manager_name varchar(255));
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> insert into Employee values('emply1','srt1','city1');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Employee values('emply2','srt2','city1');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Employee values('emply3','srt1','city2');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Employee values('emply4','srt1','city3');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Employee values('emply5','srt3','city3');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Employee values('emply6','srt2','city2');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Employee values('emply7','srt1','city1');
+Query OK, 1 row affected (0.01 sec)
+
+
+mysql> insert into Bank values('SBI','city1');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Bank values('bank1','city1');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Bank values('bank2','city2');
+Query OK, 1 row affected (0.02 sec)
+
+
+mysql> insert into Works values('emply1','SBI',10000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Works values('emply7','SBI',18000);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Works values('emply2','SBI',12000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Works values('emply3','bank1',12000);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Works values('emply4','bank1',11000);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Works values('emply5','bank1',11000);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> insert into Works values('emply6','bank2',8000);
+Query OK, 1 row affected (0.02 sec)
+
+
+--Q1
+mysql> SELECT E.e_name, E.city FROM Employee E, Works W, Bank B WHERE W.e_name=E.e_name AND
+W.bank_name=B.bank_name AND B.bank_name='SBI';
++--------+-------+
+| e_name | city  |
++--------+-------+
+| emply1 | city1 |
+| emply7 | city1 |
+| emply2 | city1 |
++--------+-------+
+3 rows in set (0.00 sec)
+
+
+--Q2
+mysql> SELECT E.e_name, E.city FROM Employee E, Works W, Bank B WHERE W.e_name=E.e_name AND W.bank_name=B.bank_name AND B.bank_name='SBI' AND W.salary > 14000;
++--------+-------+
+| e_name | city  |
++--------+-------+
+| emply7 | city1 |
++--------+-------+
+1 row in set (0.00 sec)
+
+
+--Q3
+mysql> SELECT E.e_name, E.street, E.city, B.bank_name 
+    -> FROM Employee E, Bank B, Works W
+    -> WHERE E.city=B.city AND B.bank_name=W.bank_name AND E.e_name=W.e_name;
++--------+--------+-------+-----------+
+| e_name | street | city  | bank_name |
++--------+--------+-------+-----------+
+| emply1 | srt1   | city1 | SBI       |
+| emply7 | srt1   | city1 | SBI       |
+| emply2 | srt2   | city1 | SBI       |
+| emply6 | srt2   | city2 | bank2     |
++--------+--------+-------+-----------+
+4 rows in set (0.00 sec)
+
+
+--Q5
+mysql> select e.e_name as Name, e.city as City  from Employee e  inner join Works w on e.e_name = w.e_name  where NOT w.bank_name = 'SBI';
++--------+-------+
+| Name   | City  |
++--------+-------+
+| emply3 | city2 |
+| emply4 | city3 |
+| emply5 | city3 |
+| emply6 | city2 |
+| emply5 | city3 |
++--------+-------+
+5 rows in set (0.00 sec)
+
+
+--Q6
+mysql> select *from Employee e inner join Works w on w.e_name = e.e_name where w.salary > (select max(salary) from Works where Works.bank_name = 'bank2');
++--------+--------+-------+--------+-----------+--------+
+| e_name | street | city  | e_name | bank_name | salary |
++--------+--------+-------+--------+-----------+--------+
+| emply1 | srt1   | city1 | emply1 | SBI       |  10000 |
+| emply7 | srt1   | city1 | emply7 | SBI       |  18000 |
+| emply2 | srt2   | city1 | emply2 | SBI       |  12000 |
+| emply3 | srt1   | city2 | emply3 | bank1     |  12000 |
+| emply4 | srt1   | city3 | emply4 | bank1     |  11000 |
+| emply5 | srt3   | city3 | emply5 | bank1     |  11000 |
+| emply5 | srt3   | city3 | emply5 | bank1     |  11000 |
++--------+--------+-------+--------+-----------+--------+
+7 rows in set (0.01 sec)
+
+
+--Q8
+mysql> create view v as (select w.bank_name,count(*) as count from Employee e inner join Works w on w.e_name=e.e_name group by w.bank_name);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> select max(count) from v;
++------------+
+| max(count) |
++------------+
+|          4 |
++------------+
+1 row in set (0.00 sec)
+
+
+--Q9
+mysql> select bank_name from Works w where w.salary=(select min(salary) from Works);
++-----------+
+| bank_name |
++-----------+
+| bank2     |
++-----------+
+1 row in set (0.00 sec)
+
+
+--Q10
+with c as(select bank_name, avg(salary) as a_salary  from Works group by bank_name) select bank_name from c where c.a_salary > (select avg(salary) from Works w where w.bank_name = 'SBI');
+Empty set (0.00 sec)
+
+
+--Q11
+mysql> select w.bank_name,count(*) as count from Employee e inner join Works w on w.e_name=e.e_name group by w.bank_name;
++-----------+-------+
+| bank_name | count |
++-----------+-------+
+| SBI       |     3 |
+| bank1     |     4 |
+| bank2     |     1 |
++-----------+-------+
+3 rows in set (0.00 sec)
